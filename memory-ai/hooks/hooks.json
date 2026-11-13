@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "SessionStart": [{"hooks": [
+      {"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "hello"], "timeout": 10},
+      {"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "start"], "async": true, "timeout": 15}
+    ]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "prompt"], "async": true, "timeout": 15}]}],
+    "PreToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "pre"], "timeout": 5}]}],
+    "PostToolUse": [{"matcher": "*", "hooks": [{"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "post"], "timeout": 30}]}],
+    "Stop": [{"hooks": [
+      {"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "stop"], "timeout": 45},
+      {"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "listen"], "async": true, "asyncRewake": true, "timeout": 43200}
+    ]}],
+    "Notification": [{"hooks": [{"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "notify"], "async": true, "timeout": 15}]}],
+    "PermissionRequest": [{"hooks": [{"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "permission"], "timeout": 660}]}],
+    "SessionEnd": [{"hooks": [{"type": "command", "command": "/usr/bin/python3", "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/memoryai.py", "hook", "end"]}]}]
+  }
+}

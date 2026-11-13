@@ -1,0 +1,18 @@
+{
+  "name": "memory-ai",
+  "description": "Memory AI plugins for Claude Code",
+  "owner": {
+    "name": "Memory AI",
+    "email": "app@sizze.io",
+    "url": "https://appmemory.io"
+  },
+  "plugins": [
+    {
+      "name": "memory-ai",
+      "source": "./memory-ai",
+      "description": "Your Claude Code sessions on your phone, in Memory AI → Chats: watch each session live, get a push when it finishes or needs you, reply, approve and stop from the phone, and open a project to your team.",
+      "category": "productivity",
+      "tags": ["mobile", "notifications", "remote-control", "approvals", "collaboration"]
+    }
+  ]
+}
