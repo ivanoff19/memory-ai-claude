@@ -1,7 +1,7 @@
 {
   "name": "memory-ai",
   "displayName": "Memory AI",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "Your Claude Code sessions on your phone, in Memory AI → Chats: watch each session live, get a push when it finishes or needs you, reply, approve and stop from the phone, and open a project to your team.",
   "author": {"name": "Memory AI", "email": "app@sizze.io", "url": "https://appmemory.io"},
   "homepage": "https://appmemory.io",

@@ -34,6 +34,15 @@ claude plugin marketplace add ivanoff19/memory-ai-claude && claude plugin instal
 
 Then start a new session (or run `/reload-plugins`).
 
+To update, run this and start a new session:
+
+```bash
+claude plugin marketplace update memory-ai && claude plugin update memory-ai@memory-ai
+```
+
+When a new version is out, Memory AI tells you once, at the start of a session, and the app's
+Claude Code settings mark the Macs that need it.
+
 ## Connect
 
 Nothing to type. In the first session after install, the plugin asks Memory AI to link this Mac

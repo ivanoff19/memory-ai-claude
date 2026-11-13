@@ -52,7 +52,7 @@ import time
 import urllib.error
 import urllib.request
 
-VERSION = "0.3.9"
+VERSION = "0.3.10"
 BASE = os.environ.get("MEMORYAI_BASE", "https://memory.memoryai.club/api:0Zk38beL").rstrip("/")
 HOME = os.path.expanduser(os.environ.get("MEMORYAI_HOME", "~/.memory-ai"))
 CONF = os.path.join(HOME, "claude-code.json")
@@ -66,6 +66,8 @@ QUEUE = os.path.join(HOME, "queue")         # <session_id> — с телефон
 PERMS = os.path.join(HOME, "perm")          # <session_id>~<pid>.json — хук ждёт ответа о разрешении
 LOG = os.path.join(HOME, "log.txt")
 AUTO = os.path.join(HOME, "auto.json")      # автоподключение: {state, until, told} — когда пробовать снова
+LATEST = os.path.join(HOME, "latest.json")  # {v, told}: последняя версия плагина (сервер в ответе на start)
+UPDATE_CMD = "claude plugin marketplace update memory-ai && claude plugin update memory-ai@memory-ai"
 
 AWAY_AFTER = 120               # секунд без клавиатуры и мыши — человек не у Мака
 BACK_AFTER = 3                 # тронул клавиатуру — вернулся (вопрос о разрешении уходит на Мак)
@@ -330,6 +332,9 @@ _T = {
                     "with another email: /memory-ai:connect <email>"),
     "auto_joined": ("Memory AI: этот Мак подключён ({device}). Сессии Claude Code видны в «Чатах».",
                     "Memory AI: this Mac is connected ({device}). Claude Code sessions are in Chats."),
+    "update": ("Memory AI: вышла версия {new}, у вас {old}. Обновить в Терминале: {cmd} — и начните новую сессию.",
+               "Memory AI: version {new} is out, you have {old}. To update, run in Terminal: {cmd} — "
+               "then start a new session."),
 }
 _lang_cache = []
 
@@ -468,6 +473,9 @@ def status_cmd():
         n = len([f for f in os.listdir(LISTEN) if f.endswith(".json")]) if os.path.isdir(LISTEN) else 0
         print(T("connected", device=me.get("device"), n=n, where=T("not_at_mac" if away() else "at_mac"),
                 idle=int(idle_seconds())))
+        new = newer_version()
+        if new:
+            print(T("update", new=new, old=VERSION, cmd=UPDATE_CMD))
         return 0
     if st == 401:
         print(T("revoked"))
@@ -512,18 +520,47 @@ def _pause(state, sec, **extra):
     write_json(AUTO, {"state": state, "until": time.time() + sec, **extra})
 
 
+def _vt(v):
+    """«0.3.10» → (0, 3, 10) для сравнения; не версия — ()."""
+    if not isinstance(v, str) or not re.fullmatch(r"\d{1,4}(?:\.\d{1,4}){1,3}", v):
+        return ()
+    return tuple(int(x) for x in v.split("."))
+
+
+def newer_version():
+    """Вышла версия новее этой (сервер узнаёт её с GitHub и отдаёт в ответе на start) → она, иначе None."""
+    v = (read_json(LATEST) or {}).get("v")
+    return v if _vt(v) > _vt(VERSION) else None
+
+
+def _note_latest(v):
+    """Ответ на start: запомнить последнюю версию; сказать о ней — дело hook_hello следующей сессии."""
+    if not _vt(v):
+        return
+    old = read_json(LATEST) or {}
+    if old.get("v") != v:
+        write_json(LATEST, {"v": v, "told": old.get("told")})
+
+
 def hook_hello(inp):
-    """SessionStart, синхронный. Привязан — молчит (раз после автопривязки говорит «подключён»).
+    """SessionStart, синхронный. Привязан — молчит; раз после автопривязки говорит «подключён» и раз
+    на каждую новую версию плагина — как обновить (13.11.2026, только человеку, Claude не видит).
     Нет — сам просит привязку на почту Claude и показывает число. Пауза в auto.json — молчит."""
-    if os.environ.get("MEMORYAI_AUTO") == "0":
-        return 0
     c = conf()
-    a = read_json(AUTO) or {}
     if c:
+        a = read_json(AUTO) or {}
         if a.get("state") == "joined":
             _rm(AUTO)
             _say(T("auto_joined", device=c.get("device") or "Mac"))
+            return 0
+        new = newer_version()
+        if new and (read_json(LATEST) or {}).get("told") != new:
+            write_json(LATEST, {"v": new, "told": new})
+            _say(T("update", new=new, old=VERSION, cmd=UPDATE_CMD))
         return 0
+    if os.environ.get("MEMORYAI_AUTO") == "0":
+        return 0
+    a = read_json(AUTO) or {}
     p = read_json(PENDING)
     if _fresh(p):
         if p.get("auto") and p.get("number"):
@@ -1598,7 +1635,8 @@ def _event(c, inp, event, **extra):
 
 
 def hook_start(c, inp):
-    _event(c, inp, "start", away=away())
+    r = _event(c, inp, "start", away=away())
+    _note_latest(r.get("latest"))
     spawn_sync(inp)
 
 
