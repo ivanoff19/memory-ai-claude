@@ -68,8 +68,12 @@ and Telegram keys, JWTs, and `password=` / `token=` style values. Files under `~
 `~/.gnupg`, `.env*`, `.netrc`, `*.pem`, `*.key` and similar are sent by name only.
 
 Your email is used once, to find your account for the link request. The plugin keeps its state
-in `~/.memory-ai` (the device token is readable only by you). Remove a session's chat in the app
-to delete it; `/memory-ai:disconnect` stops all sending.
+in `~/.memory-ai` (the device token is readable only by you). `/memory-ai:disconnect` stops all
+sending.
+
+Your sessions are kept in your Memory AI account until you delete them: **Disconnect this Mac** in
+the app's Claude Code settings deletes all of that Mac's sessions from the server, and so does
+deleting your Memory AI account. Hiding a chat only takes it off the list.
 [Privacy policy](https://appmemory.io/privacy).
 
 ## Settings
